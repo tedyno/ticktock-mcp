@@ -109,9 +109,12 @@ func (c *Client) GetCurrentUser() (*User, error) {
 	return &result, err
 }
 
-func (c *Client) GetWorkspaceUsers(workspaceID string) ([]User, error) {
+func (c *Client) GetWorkspaceUsers(workspaceID string, page, pageSize int) ([]User, error) {
 	var result []User
-	err := c.do("GET", fmt.Sprintf("/workspaces/%s/users", workspaceID), nil, &result)
+	q := url.Values{}
+	q.Set("page", fmt.Sprintf("%d", page))
+	q.Set("pageSize", fmt.Sprintf("%d", pageSize))
+	err := c.do("GET", fmt.Sprintf("/workspaces/%s/users?%s", workspaceID, q.Encode()), nil, &result)
 	return result, err
 }
 
@@ -192,9 +195,12 @@ type UpdateTaskRequest struct {
 	Status   string `json:"status,omitempty"`
 }
 
-func (c *Client) GetTasks(workspaceID, projectID string) ([]Task, error) {
+func (c *Client) GetTasks(workspaceID, projectID string, page, pageSize int) ([]Task, error) {
 	var result []Task
-	err := c.do("GET", fmt.Sprintf("/workspaces/%s/projects/%s/tasks", workspaceID, projectID), nil, &result)
+	q := url.Values{}
+	q.Set("page", fmt.Sprintf("%d", page))
+	q.Set("page-size", fmt.Sprintf("%d", pageSize))
+	err := c.do("GET", fmt.Sprintf("/workspaces/%s/projects/%s/tasks?%s", workspaceID, projectID, q.Encode()), nil, &result)
 	return result, err
 }
 
@@ -232,9 +238,12 @@ type UpdateTagRequest struct {
 	Archived *bool  `json:"archived,omitempty"`
 }
 
-func (c *Client) GetTags(workspaceID string) ([]Tag, error) {
+func (c *Client) GetTags(workspaceID string, page, pageSize int) ([]Tag, error) {
 	var result []Tag
-	err := c.do("GET", fmt.Sprintf("/workspaces/%s/tags", workspaceID), nil, &result)
+	q := url.Values{}
+	q.Set("page", fmt.Sprintf("%d", page))
+	q.Set("page-size", fmt.Sprintf("%d", pageSize))
+	err := c.do("GET", fmt.Sprintf("/workspaces/%s/tags?%s", workspaceID, q.Encode()), nil, &result)
 	return result, err
 }
 
@@ -272,9 +281,12 @@ type UpdateClientRequest struct {
 	Archived *bool  `json:"archived,omitempty"`
 }
 
-func (c *Client) GetClients(workspaceID string) ([]ClockifyClient, error) {
+func (c *Client) GetClients(workspaceID string, page, pageSize int) ([]ClockifyClient, error) {
 	var result []ClockifyClient
-	err := c.do("GET", fmt.Sprintf("/workspaces/%s/clients", workspaceID), nil, &result)
+	q := url.Values{}
+	q.Set("page", fmt.Sprintf("%d", page))
+	q.Set("page-size", fmt.Sprintf("%d", pageSize))
+	err := c.do("GET", fmt.Sprintf("/workspaces/%s/clients?%s", workspaceID, q.Encode()), nil, &result)
 	return result, err
 }
 
@@ -333,12 +345,14 @@ type UpdateTimeEntryRequest struct {
 	Billable    bool     `json:"billable"`
 }
 
-func (c *Client) GetTimeEntries(workspaceID, userID string, params url.Values) ([]TimeEntry, error) {
+func (c *Client) GetTimeEntries(workspaceID, userID string, params url.Values, page, pageSize int) ([]TimeEntry, error) {
 	var result []TimeEntry
-	endpoint := fmt.Sprintf("/workspaces/%s/user/%s/time-entries", workspaceID, userID)
-	if len(params) > 0 {
-		endpoint += "?" + params.Encode()
+	if params == nil {
+		params = url.Values{}
 	}
+	params.Set("page", fmt.Sprintf("%d", page))
+	params.Set("page-size", fmt.Sprintf("%d", pageSize))
+	endpoint := fmt.Sprintf("/workspaces/%s/user/%s/time-entries?%s", workspaceID, userID, params.Encode())
 	err := c.do("GET", endpoint, nil, &result)
 	return result, err
 }

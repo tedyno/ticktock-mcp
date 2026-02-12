@@ -18,7 +18,9 @@ func registerUserTools(s *server.MCPServer, r *registry) {
 
 	s.AddTool(
 		mcp.NewTool("clockify_user_list",
-			mcp.WithDescription("List all users in a workspace"),
+			mcp.WithDescription("List users in a workspace (paginated, default page 1, page_size 50)"),
+			mcp.WithNumber("page", mcp.Description("Page number (default 1)")),
+			mcp.WithNumber("page_size", mcp.Description("Number of users per page (default 50)")),
 			mcp.WithString("workspace_id", mcp.Description("Workspace ID (uses default if not provided)")),
 		),
 		userListHandler(r),
@@ -43,7 +45,10 @@ func userListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError("workspace_id is required"), nil
 		}
 
-		users, err := r.client.GetWorkspaceUsers(wsID)
+		page := req.GetInt("page", 1)
+		pageSize := req.GetInt("page_size", 50)
+
+		users, err := r.client.GetWorkspaceUsers(wsID, page, pageSize)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list users: %v", err)), nil
 		}

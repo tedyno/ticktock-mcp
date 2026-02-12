@@ -12,7 +12,9 @@ import (
 func registerClientTools(s *server.MCPServer, r *registry) {
 	s.AddTool(
 		mcp.NewTool("clockify_client_list",
-			mcp.WithDescription("List all clients in a workspace"),
+			mcp.WithDescription("List clients in a workspace (paginated, default page 1, page_size 50)"),
+			mcp.WithNumber("page", mcp.Description("Page number (default 1)")),
+			mcp.WithNumber("page_size", mcp.Description("Number of clients per page (default 50)")),
 			mcp.WithString("workspace_id", mcp.Description("Workspace ID (uses default if not provided)")),
 		),
 		clientListHandler(r),
@@ -55,7 +57,10 @@ func clientListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError("workspace_id is required"), nil
 		}
 
-		clients, err := r.client.GetClients(wsID)
+		page := req.GetInt("page", 1)
+		pageSize := req.GetInt("page_size", 50)
+
+		clients, err := r.client.GetClients(wsID, page, pageSize)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list clients: %v", err)), nil
 		}

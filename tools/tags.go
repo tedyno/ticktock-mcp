@@ -12,7 +12,9 @@ import (
 func registerTagTools(s *server.MCPServer, r *registry) {
 	s.AddTool(
 		mcp.NewTool("clockify_tag_list",
-			mcp.WithDescription("List all tags in a workspace"),
+			mcp.WithDescription("List tags in a workspace (paginated, default page 1, page_size 50)"),
+			mcp.WithNumber("page", mcp.Description("Page number (default 1)")),
+			mcp.WithNumber("page_size", mcp.Description("Number of tags per page (default 50)")),
 			mcp.WithString("workspace_id", mcp.Description("Workspace ID (uses default if not provided)")),
 		),
 		tagListHandler(r),
@@ -55,7 +57,10 @@ func tagListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError("workspace_id is required"), nil
 		}
 
-		tags, err := r.client.GetTags(wsID)
+		page := req.GetInt("page", 1)
+		pageSize := req.GetInt("page_size", 50)
+
+		tags, err := r.client.GetTags(wsID, page, pageSize)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list tags: %v", err)), nil
 		}

@@ -13,10 +13,12 @@ import (
 func registerTimeEntryTools(s *server.MCPServer, r *registry) {
 	s.AddTool(
 		mcp.NewTool("clockify_time_entry_list",
-			mcp.WithDescription("List time entries for the current user"),
+			mcp.WithDescription("List time entries for the current user (paginated, default page 1, page_size 50)"),
 			mcp.WithString("start", mcp.Description("Start date filter (ISO 8601, e.g. 2024-01-01T00:00:00Z)")),
 			mcp.WithString("end", mcp.Description("End date filter (ISO 8601)")),
 			mcp.WithString("project_id", mcp.Description("Filter by project ID")),
+			mcp.WithNumber("page", mcp.Description("Page number (default 1)")),
+			mcp.WithNumber("page_size", mcp.Description("Number of entries per page (default 50)")),
 			mcp.WithString("workspace_id", mcp.Description("Workspace ID (uses default if not provided)")),
 		),
 		timeEntryListHandler(r),
@@ -86,7 +88,10 @@ func timeEntryListHandler(r *registry) server.ToolHandlerFunc {
 			params.Set("project", projectID)
 		}
 
-		entries, err := r.client.GetTimeEntries(wsID, user.ID, params)
+		page := req.GetInt("page", 1)
+		pageSize := req.GetInt("page_size", 50)
+
+		entries, err := r.client.GetTimeEntries(wsID, user.ID, params, page, pageSize)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list time entries: %v", err)), nil
 		}

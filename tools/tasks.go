@@ -12,8 +12,10 @@ import (
 func registerTaskTools(s *server.MCPServer, r *registry) {
 	s.AddTool(
 		mcp.NewTool("clockify_task_list",
-			mcp.WithDescription("List tasks for a project"),
+			mcp.WithDescription("List tasks for a project (paginated, default page 1, page_size 50)"),
 			mcp.WithString("project_id", mcp.Required(), mcp.Description("Project ID")),
+			mcp.WithNumber("page", mcp.Description("Page number (default 1)")),
+			mcp.WithNumber("page_size", mcp.Description("Number of tasks per page (default 50)")),
 			mcp.WithString("workspace_id", mcp.Description("Workspace ID (uses default if not provided)")),
 		),
 		taskListHandler(r),
@@ -66,7 +68,10 @@ func taskListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError("project_id is required"), nil
 		}
 
-		tasks, err := r.client.GetTasks(wsID, projectID)
+		page := req.GetInt("page", 1)
+		pageSize := req.GetInt("page_size", 50)
+
+		tasks, err := r.client.GetTasks(wsID, projectID, page, pageSize)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list tasks: %v", err)), nil
 		}
