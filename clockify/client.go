@@ -466,12 +466,18 @@ type DetailedReport struct {
 	TotalCount  int                   `json:"totalsCount,omitempty"`
 }
 
+type ReportTimeInterval struct {
+	Start    string `json:"start"`
+	End      string `json:"end,omitempty"`
+	Duration int64  `json:"duration,omitempty"`
+}
+
 type DetailedReportEntry struct {
-	Description  string `json:"description"`
-	ProjectName  string `json:"projectName"`
-	UserName     string `json:"userName"`
-	TimeInterval TimeInterval `json:"timeInterval"`
-	Duration     int64  `json:"duration"`
+	Description  string             `json:"description"`
+	ProjectName  string             `json:"projectName"`
+	UserName     string             `json:"userName"`
+	TimeInterval ReportTimeInterval `json:"timeInterval"`
+	Duration     int64              `json:"duration"`
 }
 
 func (c *Client) GetSummaryReport(workspaceID string, req SummaryReportRequest) (*SummaryReport, error) {
