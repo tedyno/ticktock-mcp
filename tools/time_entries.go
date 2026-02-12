@@ -96,7 +96,7 @@ func timeEntryListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list time entries: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(entries)
+		return mcp.NewToolResultJSON(map[string]any{"entries": entries})
 	}
 }
 

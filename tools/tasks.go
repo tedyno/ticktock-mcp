@@ -76,7 +76,7 @@ func taskListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list tasks: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(tasks)
+		return mcp.NewToolResultJSON(map[string]any{"tasks": tasks})
 	}
 }
 

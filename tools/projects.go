@@ -73,7 +73,7 @@ func projectListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list projects: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(projects)
+		return mcp.NewToolResultJSON(map[string]any{"projects": projects})
 	}
 }
 

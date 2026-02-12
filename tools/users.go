@@ -53,6 +53,6 @@ func userListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list users: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(users)
+		return mcp.NewToolResultJSON(map[string]any{"users": users})
 	}
 }

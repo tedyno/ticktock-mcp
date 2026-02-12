@@ -24,6 +24,6 @@ func workspaceListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list workspaces: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(workspaces)
+		return mcp.NewToolResultJSON(map[string]any{"workspaces": workspaces})
 	}
 }
