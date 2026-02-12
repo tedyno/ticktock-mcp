@@ -18,6 +18,14 @@ Every tool supports an optional `workspace_id` parameter to override the default
 
 ## Installation
 
+### Docker (recommended)
+
+```bash
+docker pull tedyno/ticktock-mcp:latest
+```
+
+### Go
+
 ```bash
 go install github.com/tedyno/ticktock-mcp@latest
 ```
@@ -55,7 +63,29 @@ You can get your API key from [Clockify Settings](https://app.clockify.me/user/p
 
 ## Usage with Claude Code
 
-Add to your Claude Code MCP configuration (`~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+### Docker
+
+```json
+{
+  "mcpServers": {
+    "clockify": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "CLOCKIFY_API_KEY", "tedyno/ticktock-mcp:latest"],
+      "env": {
+        "CLOCKIFY_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+Or via CLI:
+
+```bash
+claude mcp add clockify -e CLOCKIFY_API_KEY=your-api-key -- docker run -i --rm -e CLOCKIFY_API_KEY tedyno/ticktock-mcp:latest
+```
+
+### Binary
 
 ```json
 {
@@ -70,25 +100,10 @@ Add to your Claude Code MCP configuration (`~/.claude/claude_desktop_config.json
 }
 ```
 
-Or if using a local build:
-
-```json
-{
-  "mcpServers": {
-    "clockify": {
-      "command": "/path/to/ticktock-mcp",
-      "env": {
-        "CLOCKIFY_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
-
-You can also add it via CLI:
+Or via CLI:
 
 ```bash
-claude mcp add clockify -- /path/to/ticktock-mcp
+claude mcp add clockify -e CLOCKIFY_API_KEY=your-api-key -- ticktock-mcp
 ```
 
 ## Available Tools
