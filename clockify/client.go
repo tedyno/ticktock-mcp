@@ -142,12 +142,14 @@ type UpdateProjectRequest struct {
 	Archived *bool  `json:"archived,omitempty"`
 }
 
-func (c *Client) GetProjects(workspaceID string, archived bool) ([]Project, error) {
+func (c *Client) GetProjects(workspaceID string, archived bool, page, pageSize int) ([]Project, error) {
 	var result []Project
 	q := url.Values{}
 	if archived {
 		q.Set("archived", "true")
 	}
+	q.Set("page", fmt.Sprintf("%d", page))
+	q.Set("page-size", fmt.Sprintf("%d", pageSize))
 	endpoint := fmt.Sprintf("/workspaces/%s/projects?%s", workspaceID, q.Encode())
 	err := c.do("GET", endpoint, nil, &result)
 	return result, err
