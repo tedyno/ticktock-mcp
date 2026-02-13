@@ -37,7 +37,7 @@ func main() {
 
 	s := server.NewMCPServer(
 		"ticktock-mcp",
-		"0.1.0",
+		"1.0.0",
 		server.WithToolCapabilities(false),
 	)
 
