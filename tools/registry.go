@@ -10,8 +10,8 @@ import (
 )
 
 // resultJSON marshals data to JSON and returns it as a text-only tool result.
-// Unlike mcp.NewToolResultJSON, this does NOT set StructuredContent,
-// avoiding Claude Code's Zod validation error on structuredContent field.
+// This does NOT set StructuredContent, avoiding Claude Code's Zod validation
+// error on the structuredContent field.
 func resultJSON(data any) (*mcp.CallToolResult, error) {
 	b, err := json.Marshal(data)
 	if err != nil {

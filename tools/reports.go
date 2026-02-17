@@ -73,7 +73,7 @@ func reportSummaryHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get summary report: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(report)
+		return resultJSON(report)
 	}
 }
 
@@ -116,6 +116,6 @@ func reportDetailedHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get detailed report: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(report)
+		return resultJSON(report)
 	}
 }

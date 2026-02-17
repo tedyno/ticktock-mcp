@@ -76,7 +76,7 @@ func taskListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list tasks: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(map[string]any{"tasks": tasks})
+		return resultJSON(map[string]any{"tasks": tasks})
 	}
 }
 
@@ -104,7 +104,7 @@ func taskCreateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create task: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(task)
+		return resultJSON(task)
 	}
 }
 
@@ -140,7 +140,7 @@ func taskUpdateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to update task: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(task)
+		return resultJSON(task)
 	}
 }
 

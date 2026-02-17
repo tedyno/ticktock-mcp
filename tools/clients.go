@@ -65,7 +65,7 @@ func clientListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list clients: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(map[string]any{"clients": clients})
+		return resultJSON(map[string]any{"clients": clients})
 	}
 }
 
@@ -86,7 +86,7 @@ func clientCreateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create client: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(client)
+		return resultJSON(client)
 	}
 }
 
@@ -117,7 +117,7 @@ func clientUpdateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to update client: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(client)
+		return resultJSON(client)
 	}
 }
 

@@ -60,7 +60,7 @@ func timerStartHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to start timer: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(entry)
+		return resultJSON(entry)
 	}
 }
 
@@ -81,7 +81,7 @@ func timerStopHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to stop timer: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(entry)
+		return resultJSON(entry)
 	}
 }
 
@@ -106,6 +106,6 @@ func timerCurrentHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultText("No timer is currently running."), nil
 		}
 
-		return mcp.NewToolResultJSON(entry)
+		return resultJSON(entry)
 	}
 }

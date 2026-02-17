@@ -96,7 +96,7 @@ func timeEntryListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list time entries: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(map[string]any{"entries": entries})
+		return resultJSON(map[string]any{"entries": entries})
 	}
 }
 
@@ -129,7 +129,7 @@ func timeEntryCreateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create time entry: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(entry)
+		return resultJSON(entry)
 	}
 }
 
@@ -162,7 +162,7 @@ func timeEntryUpdateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to update time entry: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(entry)
+		return resultJSON(entry)
 	}
 }
 

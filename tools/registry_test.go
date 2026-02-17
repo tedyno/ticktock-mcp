@@ -2,6 +2,9 @@ package tools
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -66,5 +69,24 @@ func TestResultJSON_HandlesStruct(t *testing.T) {
 	}
 	if parsed["id"] != "1" || parsed["name"] != "test" {
 		t.Fatalf("unexpected parsed content: %v", parsed)
+	}
+}
+
+func TestNoToolUsesNewToolResultJSON(t *testing.T) {
+	files, err := filepath.Glob("*.go")
+	if err != nil {
+		t.Fatalf("failed to glob: %v", err)
+	}
+	for _, f := range files {
+		if f == "registry_test.go" {
+			continue
+		}
+		data, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatalf("failed to read %s: %v", f, err)
+		}
+		if strings.Contains(string(data), "NewToolResultJSON") {
+			t.Errorf("%s still uses mcp.NewToolResultJSON — use resultJSON() instead", f)
+		}
 	}
 }

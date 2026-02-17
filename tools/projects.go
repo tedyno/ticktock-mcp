@@ -73,7 +73,7 @@ func projectListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list projects: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(map[string]any{"projects": projects})
+		return resultJSON(map[string]any{"projects": projects})
 	}
 }
 
@@ -100,7 +100,7 @@ func projectCreateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create project: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(project)
+		return resultJSON(project)
 	}
 }
 
@@ -137,7 +137,7 @@ func projectUpdateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to update project: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(project)
+		return resultJSON(project)
 	}
 }
 

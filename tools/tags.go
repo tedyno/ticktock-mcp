@@ -65,7 +65,7 @@ func tagListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list tags: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(map[string]any{"tags": tags})
+		return resultJSON(map[string]any{"tags": tags})
 	}
 }
 
@@ -86,7 +86,7 @@ func tagCreateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create tag: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(tag)
+		return resultJSON(tag)
 	}
 }
 
@@ -117,7 +117,7 @@ func tagUpdateHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to update tag: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(tag)
+		return resultJSON(tag)
 	}
 }
 

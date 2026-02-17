@@ -34,7 +34,7 @@ func userCurrentHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get current user: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(user)
+		return resultJSON(user)
 	}
 }
 
@@ -53,6 +53,6 @@ func userListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list users: %v", err)), nil
 		}
 
-		return mcp.NewToolResultJSON(map[string]any{"users": users})
+		return resultJSON(map[string]any{"users": users})
 	}
 }
