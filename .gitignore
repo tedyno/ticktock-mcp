@@ -3,3 +3,4 @@ ticktock-mcp
 *.dll
 *.so
 *.dylib
+.worktrees/
