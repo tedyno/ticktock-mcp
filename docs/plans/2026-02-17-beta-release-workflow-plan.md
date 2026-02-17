@@ -1,0 +1,159 @@
+# Beta Release Workflow Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Add a GitHub Actions workflow for beta releases that builds binaries, creates a prerelease on GitHub, and pushes Docker images without the `latest` tag.
+
+**Architecture:** Create a new `beta-release.yml` workflow triggered by `v*-beta.*` tags. Update the existing `release.yml` to exclude beta tags so both workflows don't fire on the same tag. The beta workflow mirrors the stable workflow with two differences: GitHub release is marked as prerelease, and Docker image only gets the version tag (no `latest`).
+
+**Tech Stack:** GitHub Actions, Docker, Go
+
+---
+
+### Task 1: Update stable release workflow to exclude beta tags
+
+**Files:**
+- Modify: `.github/workflows/release.yml`
+
+**Step 1: Update the tag filter**
+
+In `.github/workflows/release.yml`, change the `on.push.tags` pattern to exclude beta tags. GitHub Actions doesn't support negative patterns in `tags`, so we use a `tags` + job-level `if` condition to skip beta tags.
+
+Replace:
+```yaml
+on:
+  push:
+    tags:
+      - "v*"
+```
+
+With:
+```yaml
+on:
+  push:
+    tags:
+      - "v*"
+      - "!v*-beta.*"
+```
+
+**Step 2: Commit**
+
+```bash
+git add .github/workflows/release.yml
+git commit -m "ci: exclude beta tags from stable release workflow"
+```
+
+---
+
+### Task 2: Create beta release workflow
+
+**Files:**
+- Create: `.github/workflows/beta-release.yml`
+
+**Step 1: Create the workflow file**
+
+Create `.github/workflows/beta-release.yml` with the following content:
+
+```yaml
+name: Beta Release
+
+on:
+  push:
+    tags:
+      - "v*-beta.*"
+
+permissions:
+  contents: write
+
+jobs:
+  binaries:
+    name: Build binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          EXT=""
+          if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
+          go build -ldflags="-s -w" -o ticktock-mcp-${{ steps.version.outputs.version }}-${GOOS}-${GOARCH}${EXT} .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ticktock-mcp-${{ steps.version.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ticktock-mcp-*
+
+  release:
+    name: Create GitHub prerelease
+    needs: binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          generate_release_notes: true
+          files: ticktock-mcp-*
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    environment: main
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract tag
+        id: tag
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ticktock-mcp:${{ steps.tag.outputs.version }}
+```
+
+**Step 2: Commit**
+
+```bash
+git add .github/workflows/beta-release.yml
+git commit -m "ci: add beta release workflow without latest Docker tag"
+```
