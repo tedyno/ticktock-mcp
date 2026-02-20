@@ -13,7 +13,8 @@ import (
 func registerTimeEntryTools(s *server.MCPServer, r *registry) {
 	s.AddTool(
 		mcp.NewTool("clockify_time_entry_list",
-			mcp.WithDescription("List time entries for the current user (paginated, default page 1, page_size 50)"),
+			mcp.WithDescription("List time entries for a user (defaults to authenticated user, paginated, default page 1, page_size 50)"),
+			mcp.WithString("user_id", mcp.Description("User ID to query (defaults to authenticated user)")),
 			mcp.WithString("start", mcp.Description("Start date filter (ISO 8601, e.g. 2024-01-01T00:00:00Z)")),
 			mcp.WithString("end", mcp.Description("End date filter (ISO 8601)")),
 			mcp.WithString("project_id", mcp.Description("Filter by project ID")),
@@ -72,9 +73,13 @@ func timeEntryListHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError("workspace_id is required"), nil
 		}
 
-		user, err := r.client.GetCurrentUser()
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get current user: %v", err)), nil
+		userID := req.GetString("user_id", "")
+		if userID == "" {
+			user, err := r.client.GetCurrentUser()
+			if err != nil {
+				return mcp.NewToolResultError(fmt.Sprintf("Failed to get current user: %v", err)), nil
+			}
+			userID = user.ID
 		}
 
 		params := url.Values{}
@@ -91,7 +96,7 @@ func timeEntryListHandler(r *registry) server.ToolHandlerFunc {
 		page := req.GetInt("page", 1)
 		pageSize := req.GetInt("page_size", 50)
 
-		entries, err := r.client.GetTimeEntries(wsID, user.ID, params, page, pageSize)
+		entries, err := r.client.GetTimeEntries(wsID, userID, params, page, pageSize)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to list time entries: %v", err)), nil
 		}
