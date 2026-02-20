@@ -34,10 +34,19 @@ func registerTimerTools(s *server.MCPServer, r *registry) {
 
 	s.AddTool(
 		mcp.NewTool("clockify_timer_current",
-			mcp.WithDescription("Get the currently running timer"),
+			mcp.WithDescription("Get the currently running timer for a user (defaults to the authenticated user)"),
+			mcp.WithString("user_id", mcp.Description("User ID to check (defaults to authenticated user)")),
 			mcp.WithString("workspace_id", mcp.Description("Workspace ID (uses default if not provided)")),
 		),
 		timerCurrentHandler(r),
+	)
+
+	s.AddTool(
+		mcp.NewTool("clockify_timer_all_running",
+			mcp.WithDescription("Get all currently running timers for every user in the workspace (requires admin API key)"),
+			mcp.WithString("workspace_id", mcp.Description("Workspace ID (uses default if not provided)")),
+		),
+		timerAllRunningHandler(r),
 	)
 }
 
@@ -92,12 +101,16 @@ func timerCurrentHandler(r *registry) server.ToolHandlerFunc {
 			return mcp.NewToolResultError("workspace_id is required"), nil
 		}
 
-		user, err := r.client.GetCurrentUser()
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get current user: %v", err)), nil
+		userID := req.GetString("user_id", "")
+		if userID == "" {
+			user, err := r.client.GetCurrentUser()
+			if err != nil {
+				return mcp.NewToolResultError(fmt.Sprintf("Failed to get current user: %v", err)), nil
+			}
+			userID = user.ID
 		}
 
-		entry, err := r.client.GetRunningTimer(wsID, user.ID)
+		entry, err := r.client.GetRunningTimer(wsID, userID)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get running timer: %v", err)), nil
 		}
@@ -107,5 +120,26 @@ func timerCurrentHandler(r *registry) server.ToolHandlerFunc {
 		}
 
 		return resultJSON(entry)
+	}
+}
+
+func timerAllRunningHandler(r *registry) server.ToolHandlerFunc {
+	return func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		wsID := r.workspaceID(req.GetString("workspace_id", ""))
+		if wsID == "" {
+			return mcp.NewToolResultError("workspace_id is required"), nil
+		}
+
+		// Fetch all workspace users (up to 500) and check their running timers.
+		running, err := r.client.GetAllRunningTimers(wsID, 1, 500)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get running timers: %v", err)), nil
+		}
+
+		if len(running) == 0 {
+			return mcp.NewToolResultText("No timers are currently running."), nil
+		}
+
+		return resultJSON(map[string]any{"running_timers": running, "count": len(running)})
 	}
 }

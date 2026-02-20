@@ -402,6 +402,41 @@ func (c *Client) GetRunningTimer(workspaceID, userID string) (*TimeEntry, error)
 	return &result[0], nil
 }
 
+// RunningTimerInfo holds a running timer along with user details.
+type RunningTimerInfo struct {
+	UserID   string     `json:"userId"`
+	UserName string     `json:"userName"`
+	Email    string     `json:"email"`
+	Timer    *TimeEntry `json:"timer"`
+}
+
+// GetAllRunningTimers returns running timers for all users in the workspace.
+// Requires workspace admin permissions on the API key.
+func (c *Client) GetAllRunningTimers(workspaceID string, page, pageSize int) ([]RunningTimerInfo, error) {
+	users, err := c.GetWorkspaceUsers(workspaceID, page, pageSize)
+	if err != nil {
+		return nil, fmt.Errorf("list workspace users: %w", err)
+	}
+
+	var running []RunningTimerInfo
+	for _, u := range users {
+		entry, err := c.GetRunningTimer(workspaceID, u.ID)
+		if err != nil {
+			// Skip users we can't query (e.g. permission issues).
+			continue
+		}
+		if entry != nil {
+			running = append(running, RunningTimerInfo{
+				UserID:   u.ID,
+				UserName: u.Name,
+				Email:    u.Email,
+				Timer:    entry,
+			})
+		}
+	}
+	return running, nil
+}
+
 // --- Reports ---
 
 type SummaryReportRequest struct {
